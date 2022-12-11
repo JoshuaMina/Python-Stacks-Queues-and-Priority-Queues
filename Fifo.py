@@ -11,3 +11,4 @@ fifo.dequeue()
 
 fifo.dequeue()
 
+print(fifo)
