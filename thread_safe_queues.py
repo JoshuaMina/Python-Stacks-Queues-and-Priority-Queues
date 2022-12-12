@@ -52,4 +52,3 @@ class Worker(threading.Thread):
         self.buffer = buffer
         self.product = None
         self.working = False
-        self.progress = 0
