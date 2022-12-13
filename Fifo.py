@@ -6,8 +6,10 @@ fifo.enqueue("3rd")
 fifo.enqueue("4th")
 
 fifo.dequeue()
+print(fifo)
 
 fifo.dequeue()
+print(fifo)
 
 fifo.dequeue()
 

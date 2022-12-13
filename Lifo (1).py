@@ -9,11 +9,8 @@ lifo.append("3rd")
 
 print(lifo)
 
-lifo.pop()
-print("The '3rd' element has been Dequeued",lifo)
+print("The ",lifo.pop()," element has been Dequeued",lifo )
 
-lifo.pop()
-print("The '2nd' element has been Dequeued",lifo)
+print("The ",lifo.pop()," element has been Dequeued",lifo )
 
-lifo.pop()
-print("The '1st' element has been Dequeued",lifo)
+print("The ",lifo.pop()," element has been Dequeued",lifo )
