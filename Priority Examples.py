@@ -20,4 +20,5 @@ messages.enqueue_with_priority(CRITICAL, "Brake pedal depressed")
 messages.enqueue_with_priority(CRITICAL, wipers)
 messages.enqueue_with_priority(IMPORTANT, hazard_lights)
 
+
 messages.dequeue()
