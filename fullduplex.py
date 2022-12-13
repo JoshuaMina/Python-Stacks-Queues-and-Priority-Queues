@@ -5,6 +5,10 @@ from hashlib import md5
 from itertools import product
 from string import ascii_lowercase
 
+import multiprocessing
+from dataclasses import dataclass
+import argparse
+
 
 def reverse_md5(hash_value, alphabet=ascii_lowercase, max_length=6):
     for length in range(1, max_length + 1):
@@ -39,6 +43,51 @@ def reverse_md5(hash_value, alphabet=ascii_lowercase, max_length=6):
             if hashed == hash_value:
                 return text_bytes.decode("utf-8")
 
+
+def main(args):
+    queue_in = multiprocessing.Queue()
+    queue_out = multiprocessing.Queue()
+
+    workers = [
+        Worker(queue_in, queue_out, args.hash_value)
+        for _ in range(args.num_workers)
+    ]
+
+    for worker in workers:
+        worker.start()
+
+    for text_length in range(1, args.max_length + 1):
+        combinations = Combinations(ascii_lowercase, text_length)
+        for indices in chunk_indices(len(combinations), len(workers)):
+            queue_in.put(Job(combinations, *indices))
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("hash_value")
+    parser.add_argument("-m", "--max-length", type=int, default=6)
+    parser.add_argument(
+        "-w",
+        "--num-workers",
+        type=int,
+        default=multiprocessing.cpu_count(),
+    )
+    return parser.parse_args()
+
+class Worker(multiprocessing.Process):
+    def __init__(self, queue_in, queue_out, hash_value):
+        super().__init__(daemon=True)
+        self.queue_in = queue_in
+        self.queue_out = queue_out
+        self.hash_value = hash_value
+
+    def run(self):
+        while True:
+            job = self.queue_in.get()
+            if plaintext := job(self.hash_value):
+                self.queue_out.put(plaintext)
+                break
+
+
 class Combinations:
     def __init__(self, alphabet, length):
         self.alphabet = alphabet
@@ -56,3 +105,19 @@ class Combinations:
             ]
             for i in reversed(range(self.length))
         )
+
+@dataclass(frozen=True)
+class Job:
+    combinations: Combinations
+    start_index: int
+    stop_index: int
+
+    def __call__(self, hash_value):
+        for index in range(self.start_index, self.stop_index):
+            text_bytes = self.combinations[index].encode("utf-8")
+            hashed = md5(text_bytes).hexdigest()
+            if hashed == hash_value:
+                return text_bytes.decode("utf-8")
+
+if __name__ == "__main__":
+    main(parse_args())
