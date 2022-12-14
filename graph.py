@@ -6,7 +6,7 @@ import networkx as nx
 class City(NamedTuple):
     name: str
     country: str
-    year: int | None
+    year: int
     latitude: float
     longitude: float
 
